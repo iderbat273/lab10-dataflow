@@ -1,0 +1,91 @@
+digraph BonusCFG {
+    graph [
+        label="Control Flow Graph: DataFlowTargets.bonus()",
+        labelloc=t,
+        fontsize=16,
+        rankdir=TB,
+        nodesep=0.35,
+        ranksep=0.55,
+        splines=polyline
+    ];
+
+    node [fontname="DejaVu Sans", fontsize=9, shape=box, style="rounded"];
+    edge [fontname="DejaVu Sans", fontsize=7, arrowsize=0.7];
+
+    start [shape=oval, label="Эхлэл"];
+    validation [shape=diamond, label="32: attendance == null\\n|| threshold < 0 ?"];
+    error [label="33: throw IllegalArgumentException"];
+    init [label="35–37: present=0\\nstreak=0; best=0"];
+    loop [shape=diamond, label="38: attendance-д\\nдараагийн элемент байна уу?"];
+    check_a [shape=diamond, label="39: a > 0 ?"];
+    positive [label="40–41: present++\\nstreak++"];
+    compare [shape=diamond, label="42: streak > best ?"];
+    update [label="43: best = streak"];
+    reset [label="46: streak = 0"];
+    score_init [label="49: score = 0"];
+    threshold_check [shape=diamond, label="50: present >= threshold ?"];
+    score5 [label="51: score = 5"];
+    best_check [shape=diamond, label="53: best >= 5 ?"];
+    add3 [label="54: score = score + 3"];
+    result [label="56: return score"];
+    end [shape=oval, label="Төгсгөл"];
+
+    start -> validation;
+
+    validation -> error [
+        label="True\\nnullAttendance_coversNullBranch\\nnegativeThreshold_coversInvalidThresholdBranch"
+    ];
+    validation -> init [
+        label="False\\nmixedAttendance_coversLoopDefinitions\\nemptyAttendance_coversZeroIterationPairs"
+    ];
+
+    error -> end;
+    init -> loop;
+
+    loop -> check_a [
+        label="True\\nconsecutivePresent_coversLoopDataflowPairs\\nzeroThenPresent_coversResetDefinition"
+    ];
+    loop -> score_init [
+        label="False\\nemptyAttendance_coversZeroIterationPairs"
+    ];
+
+    check_a -> positive [
+        label="True\\nconsecutivePresent_coversLoopDataflowPairs\\nlongStreakBelowThreshold_coversDirectBonus"
+    ];
+    check_a -> reset [
+        label="False\\nzeroThenPresent_coversResetDefinition\\nresetBetweenPresentDays_coversFalseStreakBranch"
+    ];
+
+    positive -> compare;
+
+    compare -> update [
+        label="True\\nconsecutivePresent_coversLoopDataflowPairs"
+    ];
+    compare -> loop [
+        label="False\\nresetBetweenPresentDays_coversFalseStreakBranch"
+    ];
+
+    update -> loop;
+    reset -> loop;
+
+    score_init -> threshold_check;
+
+    threshold_check -> score5 [
+        label="True\\nmixedAttendance_coversLoopDefinitions\\nlongStreakAtThreshold_coversScoreDefinitions"
+    ];
+    threshold_check -> best_check [
+        label="False\\nonePresentDay_coversScoreReturnDefinition\\nlongStreakBelowThreshold_coversDirectBonus"
+    ];
+
+    score5 -> best_check;
+
+    best_check -> add3 [
+        label="True\\nlongStreakAtThreshold_coversScoreDefinitions\\nlongStreakBelowThreshold_coversDirectBonus"
+    ];
+    best_check -> result [
+        label="False\\nonePresentDay_coversScoreReturnDefinition\\nemptyAttendance_coversZeroIterationPairs"
+    ];
+
+    add3 -> result;
+    result -> end;
+}
