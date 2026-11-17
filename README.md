@@ -71,3 +71,53 @@
 - Үр дүн: BUILD SUCCESS
 
 Тестийн гаралтыг `/tmp/lab10-gcd-test.txt` файлд хадгалсан.
+
+## B хэсэг. bonus() функцийн Dataflow анализ
+
+### B1. Definition ба Use
+
+| Хувьсагч | Definition | Use |
+|---|---|---|
+| attendance | 31 | 32 (p-use), 38 (p-use) |
+| threshold | 31 | 32 (p-use), 50 (p-use) |
+| present | 35, 40 | 40 (c-use), 50 (p-use) |
+| streak | 36, 41, 46 | 41 (c-use), 42 (p-use), 43 (c-use) |
+| best | 37, 43 | 42 (p-use), 53 (p-use) |
+| a | 38 | 39 (p-use) |
+| score | 49, 51, 54 | 54 (c-use), 56 (c-use) |
+
+### B2. All-defs тестүүд
+
+| Тестийн нэр | Оролт | Шалгах зорилго |
+|---|---|---|
+| nullAttendance_coversParameterDefinition | null, 0 | attendance параметрийн definition |
+| negativeThreshold_coversThresholdDefinition | [1], -1 | threshold параметрийн definition |
+| mixedAttendance_coversLoopDefinitions | [1,1,0,1], 3 | present, streak, best, a, score |
+| longStreak_coversScoreAdditionDefinition | [1,1,1,1,1], 6 | score-ийн 49-р мөрийн definition-ээс 54-р мөр хүртэл |
+| onePresentDay_coversScoreReturnDefinition | [1], 2 | score-ийн 49-р мөрийн definition-ээс 56-р мөр хүртэл |
+
+### B3. All-defs үр дүн
+
+`mvn verify` командын үр дүн:
+
+- Нийт тест: 7
+- Амжилттай: 7
+- Failure: 0
+- Error: 0
+- Skipped: 0
+- Build: SUCCESS
+
+JaCoCo тайлан:
+
+- Branch covered: 16
+- Branch missed: 0
+- Branch coverage: 100%
+- Line covered: 23
+- Line missed: 1
+- Line coverage: 95.83%
+
+JaCoCo-ийн branch coverage болон DU-pair coverage нь өөр хэмжүүр юм. Branch coverage 100% болсон нь бүх feasible DU хос хамрагдсан гэсэн үг биш.
+
+Үр дүнгийн файлууд:
+- `results/mvn-verify-alldefs.txt`
+- `results/jacoco-alldefs.csv`
